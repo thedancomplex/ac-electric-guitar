@@ -14,7 +14,8 @@ const int myInput = AUDIO_INPUT_LINEIN;
 
 /* Cap sensor*/
 // You can have up to 4 on one i2c bus but one is enough for testing!
-Adafruit_MPR121 cap = Adafruit_MPR121();
+Adafruit_MPR121 cap = Adafruit_MPR121();// 0-11 fret
+Adafruit_MPR121 cap_2 = Adafruit_MPR121(); // 12-23 fret
 
 
 /* -----------------------------------
@@ -37,8 +38,10 @@ int note_fret_0_i[12]=
 
 
 const int note_fret_1[12] =
-{12,13,14,15,16,17,18,19,20,21,22,23};
+{7,6,11,8,10,1,2,0,3,5,4,9};
 
+int note_fret_1_i[12]=
+{0,1,2,3,4,5,6,7,8,9,10,11};   
 
 /* List of all frequencies */
 const float notes[108] = {16.35  ,
@@ -202,10 +205,14 @@ void setup() {
   /* Setup Cap Touch 0 */
   cap.begin(0x5A);
 
+  /* Setup Cap Touch 2 */
+  cap_2.begin(0x5C);
+
   /* Audio Offset */
   /* Offset Setup */
   for(int i = 0; i < 12; i++){
    note_fret_0_i[note_fret_0[i]] = i;
+   note_fret_1_i[note_fret_1[i]] = i + 12;
   }
 }
 
@@ -225,6 +232,23 @@ void doNote()
     // it if *is* touched and *wasnt* touched before, alert!
     if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)) ) {
          if(the_note < (note_center+note_fret_0_i[i])) the_note = note_center+note_fret_0_i[i];
+      digitalWrite(ledPin,HIGH);
+      note_current = the_note;
+    }
+    // if it *was* touched and now *isnt*, alert!
+    if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)) ) {
+      digitalWrite(ledPin,LOW);
+    }
+  }
+
+
+
+
+  currtouched = cap_2.touched();
+  for (uint8_t i=0; i<12; i++) {
+    // it if *is* touched and *wasnt* touched before, alert!
+    if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)) ) {
+         if(the_note < (note_center+note_fret_1_i[i])) the_note = note_center+note_fret_1_i[i];
       digitalWrite(ledPin,HIGH);
       note_current = the_note;
     }
