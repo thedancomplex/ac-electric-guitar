@@ -167,6 +167,7 @@ const int ledPin =  13;      // the number of the LED pin
 */
 
 // GUItool: begin automatically generated code
+/*
 AudioInputI2S            audioInput;     //xy=137,151
 AudioSynthWaveform       waveform1;      //xy=321,209
 AudioAnalyzePeak         peak_R;         //xy=324,276
@@ -179,6 +180,26 @@ AudioConnection          patchCord3(audioInput, 1, multiply1, 0);
 AudioConnection          patchCord4(waveform1, 0, multiply1, 1);
 AudioConnection          patchCord5(multiply1, 0, audioOutput, 0);
 AudioConnection          patchCord6(multiply1, 0, audioOutput, 1);
+*/
+
+// GUItool: begin automatically generated code
+AudioInputI2S            audioInput;     //xy=1043,436
+AudioAnalyzePeak         peak_R;         //xy=1142,585
+AudioAnalyzePeak         peak_L;         //xy=1233,321
+AudioMixer4              mixer1;         //xy=1267,445
+AudioSynthWaveform       waveform1;      //xy=1327,589
+AudioEffectMultiply      multiply1;      //xy=1495,430
+AudioOutputI2S           audioOutput;    //xy=1684,427
+AudioConnection          patchCord1(audioInput, 0, peak_L, 0);
+AudioConnection          patchCord2(audioInput, 0, mixer1, 0);
+AudioConnection          patchCord3(audioInput, 1, peak_R, 0);
+AudioConnection          patchCord4(audioInput, 1, mixer1, 1);
+AudioConnection          patchCord5(mixer1, 0, multiply1, 0);
+AudioConnection          patchCord6(waveform1, 0, multiply1, 1);
+AudioConnection          patchCord7(multiply1, 0, audioOutput, 0);
+AudioConnection          patchCord8(multiply1, 0, audioOutput, 1);
+// GUItool: end automatically generated code
+
 // GUItool: end automatically generated code
 
 /* Keypad */
@@ -221,6 +242,9 @@ void setup() {
   waveform1.frequency(notes[note_current]);
   waveform1.phase(0.0);
   waveform1.amplitude(1.0);
+
+  mixer1.gain(0,1.0);
+  mixer1.gain(1,1.0);
 
   /* Setup Cap Touch 0 */
   cap.begin(0x5A);
