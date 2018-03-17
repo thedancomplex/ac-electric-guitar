@@ -210,7 +210,7 @@ char keys[ROWS][COLS] = {
   {'1', '2', '3'},
   {'4', '5', '6'},
   {'7', '8', '9'},
-  {'#', '0', '*'}
+  {'*', '0', '#'}
 };
 //byte rowPins[ROWS] = {3, 16, 20, 21}; //connect to the row pinouts of the keypad
 //byte colPins[COLS] = {17, 4, 5};//, 2}; //connect to the column pinouts of the keypad
@@ -230,6 +230,19 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 AudioControlSGTL5000 audioShield;
 
 
+
+
+
+/* mixer choice setting */
+int MIXER_NUM = 3;
+int MIXER_CURRENT = 2;
+int MIXER_L = 0;
+int MIXER_R = 1;
+int MIXER_LR= 2;
+
+
+
+  
 void setup() {
   AudioMemory(56);
   audioShield.enable();
@@ -245,6 +258,8 @@ void setup() {
 
   mixer1.gain(0,1.0);
   mixer1.gain(1,1.0);
+
+
 
   /* Setup Cap Touch 0 */
   cap.begin(0x5A);
@@ -390,6 +405,31 @@ void keyAction(char key)
       note_current = note_current + 1;
       waveform1.frequency(notes[note_current]);
     }
+  }
+
+
+  if('*' == key) {
+    MIXER_CURRENT = MIXER_CURRENT+1;
+    if(MIXER_CURRENT > MIXER_NUM) MIXER_CURRENT = 0;
+    if(MIXER_CURRENT == MIXER_L){
+      mixer1.gain(0,1.0);
+      mixer1.gain(1,0.0);
+      mixer1.gain(2,0.0);
+      mixer1.gain(3,0.0);
+    }
+    if(MIXER_CURRENT == MIXER_R){
+      mixer1.gain(0,0.0);
+      mixer1.gain(1,1.0);
+      mixer1.gain(2,0.0);
+      mixer1.gain(3,0.0);
+    }
+    if(MIXER_CURRENT == MIXER_LR){
+      mixer1.gain(0,1.0);
+      mixer1.gain(1,1.0);
+      mixer1.gain(2,0.0);
+      mixer1.gain(3,0.0);
+    }
+    
   }
 
 }
