@@ -339,9 +339,40 @@ void doPrintPeak() {
   }
 }
 
+
+void keyAction(char key)
+{
+  if('1' == key){  
+          //note_max = 108;
+          if(note_center > 0)
+          {  
+            note_center = note_center - 1;
+            note_current = note_current -1;
+            waveform1.frequency(notes[note_current]);
+          }
+   }
+  if('2' == key){
+            // return to normal
+            int tmp = 46 - note_center;
+            note_current = note_current + tmp;
+            note_center = 46;
+    }
+    if('3' == key){  
+          //note_max = 108;
+          if(note_center < (108-25))
+          {  
+            note_center = note_center + 1;
+            note_current = note_current +1;
+            waveform1.frequency(notes[note_current]);
+          }
+    }
+  
+}
+
 void doPrintKey() {
     char key = keypad.getKey();
   if (key != NO_KEY){
+    keyAction(key);
     Serial.println(key);
   }
 }
