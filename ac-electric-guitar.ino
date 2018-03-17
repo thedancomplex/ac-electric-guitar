@@ -8,6 +8,7 @@ This example code is in the public domain
 #include <SPI.h>
 #include <SD.h>
 #include <SerialFlash.h>
+#include <Keypad.h>
 
 const int myInput = AUDIO_INPUT_LINEIN;
 // const int myInput = AUDIO_INPUT_MIC;
@@ -179,6 +180,24 @@ AudioConnection          patchCord5(multiply1, 0, audioOutput, 0);
 AudioConnection          patchCord6(multiply1, 0, audioOutput, 1);
 // GUItool: end automatically generated code
 
+/* Keypad */
+
+const byte ROWS = 4; //four rows
+const byte COLS = 3; //three columns
+char keys[ROWS][COLS] = {
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'#','0','*'}
+};
+//byte rowPins[ROWS] = {3, 16, 20, 21}; //connect to the row pinouts of the keypad
+//byte colPins[COLS] = {17, 4, 5};//, 2}; //connect to the column pinouts of the keypad
+//byte rowPins[ROWS] = {3, 16, 20, 21}; //connect to the row pinouts of the keypad
+//byte colPins[COLS] = {17, 4, 5,2};//, 21}; //connect to the column pinouts of the keypad
+byte rowPins[ROWS] = {17,4,5,2}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {3,20,16};//, 2}; //connect to the column pinouts of the keypad
+
+Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 
 
@@ -280,9 +299,23 @@ void doNote()
 
 
 
-void loop() {
-  doNote();
-  if(fps > 24) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void doPrintPeak() {
+   if(fps > 24) {
     if (peak_L.available() && peak_R.available()) {
       fps=0;
       uint8_t leftPeak=peak_L.read() * 30.0;
@@ -304,4 +337,16 @@ void loop() {
       Serial.println();
     }
   }
+}
+
+void doPrintKey() {
+    char key = keypad.getKey();
+  if (key != NO_KEY){
+    Serial.println(key);
+  }
+}
+void loop() {
+  doNote();
+  doPrintPeak();
+  doPrintKey();
 }
