@@ -225,8 +225,14 @@ uint8_t cnt=0;
 
 void doNote()
 {
+  bool read_high = false;
+  bool read_low = false;
+  int is_touched = 0;
   currtouched = cap.touched();
+  if(0 == currtouched) read_high = true;
   int the_note = note_center;
+  
+  
   float vol = 0.5;
   for (uint8_t i=0; i<12; i++) {
     // it if *is* touched and *wasnt* touched before, alert!
@@ -234,23 +240,26 @@ void doNote()
          if(the_note < (note_center+note_fret_0_i[i])) the_note = note_center+note_fret_0_i[i];
       digitalWrite(ledPin,HIGH);
       note_current = the_note;
+      is_touched++;
     }
     // if it *was* touched and now *isnt*, alert!
     if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)) ) {
       digitalWrite(ledPin,LOW);
+      
     }
   }
 
 
 
-
   currtouched = cap_2.touched();
+  if(0 == currtouched) read_low = true;
   for (uint8_t i=0; i<12; i++) {
     // it if *is* touched and *wasnt* touched before, alert!
     if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)) ) {
          if(the_note < (note_center+note_fret_1_i[i])) the_note = note_center+note_fret_1_i[i];
       digitalWrite(ledPin,HIGH);
       note_current = the_note;
+      is_touched++;
     }
     // if it *was* touched and now *isnt*, alert!
     if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)) ) {
@@ -258,6 +267,8 @@ void doNote()
     }
   }
 
+  //if((0 == is_touched) & read_high & read_low) note_current = note_center; 
+  if(read_high & read_low) note_current = note_center;
   audioShield.volume(vol);
   waveform1.frequency(notes[note_current]);
   // reset our state
