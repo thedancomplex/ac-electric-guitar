@@ -19,10 +19,23 @@ Adafruit_MPR121 cap = Adafruit_MPR121();// 0-11 fret
 Adafruit_MPR121 cap_2 = Adafruit_MPR121(); // 12-23 fret
 
 
+
+/* detune amount */
+float DETUNE_K = 1.1;
+int DETUNE_FLAG = 0;
+float DETUNE_STEP = 0.5;
+
+/* tone mode switch */
+int TONE_MODE_I = 0;
+int TONE_MODE_MAX = 400;
+
 /* -----------------------------------
     Note definitions start
     ----------------------------------
 */
+
+float MIXER_THROUGH_GAIN = 0.5;
+float MIXER_THROUGH_GAIN_S = 1.0;
 
 int note_max = 108;
 //int note_current = 58; //440
@@ -183,6 +196,7 @@ AudioConnection          patchCord6(multiply1, 0, audioOutput, 1);
 */
 
 // GUItool: begin automatically generated code
+/*
 AudioInputI2S            audioInput;     //xy=1043,436
 AudioAnalyzePeak         peak_R;         //xy=1142,585
 AudioAnalyzePeak         peak_L;         //xy=1233,321
@@ -198,7 +212,68 @@ AudioConnection          patchCord5(mixer1, 0, multiply1, 0);
 AudioConnection          patchCord6(waveform1, 0, multiply1, 1);
 AudioConnection          patchCord7(multiply1, 0, audioOutput, 0);
 AudioConnection          patchCord8(multiply1, 0, audioOutput, 1);
+*/
 // GUItool: end automatically generated code
+
+
+
+// GUItool: begin automatically generated code
+
+// GUItool: begin automatically generated code
+
+// GUItool: begin automatically generated code
+AudioInputI2S            audioInput;     //xy=878,376
+AudioAnalyzePeak         peak_R;         //xy=1002,651
+AudioMixer4              mixer3;         //xy=1042,488
+AudioSynthWaveform       waveform5;      //xy=1095,719
+AudioSynthWaveform       waveform6;      //xy=1117,765
+AudioSynthWaveform       waveform7;      //xy=1129,816
+AudioSynthWaveform       waveform8;      //xy=1142,875
+AudioEffectMultiply      multiply2;      //xy=1178,411
+AudioEffectMultiply      multiply3;      //xy=1183,466
+AudioAnalyzePeak         peak_L;         //xy=1233,321
+AudioSynthWaveform       waveform1;      //xy=1309,534
+AudioMixer4              mixer1;         //xy=1319,394
+AudioSynthWaveform       waveform2;      //xy=1326,581
+AudioSynthWaveform       waveform3;      //xy=1339,625
+AudioSynthWaveform       waveform4;      //xy=1358,691
+AudioMixer4              mixer5;         //xy=1362,802
+AudioEffectMultiply      multiply1;      //xy=1495,430
+AudioMixer4              mixer2;         //xy=1495,595
+AudioMixer4              mixer4;         //xy=1649,618
+AudioOutputI2S           audioOutput;    //xy=1684,427
+AudioConnection          patchCord1(audioInput, 0, peak_L, 0);
+AudioConnection          patchCord2(audioInput, 0, mixer1, 0);
+AudioConnection          patchCord3(audioInput, 0, multiply2, 0);
+AudioConnection          patchCord4(audioInput, 0, multiply3, 0);
+AudioConnection          patchCord5(audioInput, 1, peak_R, 0);
+AudioConnection          patchCord6(audioInput, 1, mixer1, 1);
+AudioConnection          patchCord7(audioInput, 1, multiply2, 1);
+AudioConnection          patchCord8(audioInput, 1, mixer3, 0);
+AudioConnection          patchCord9(mixer3, 0, multiply3, 1);
+AudioConnection          patchCord10(waveform5, 0, mixer5, 0);
+AudioConnection          patchCord11(waveform6, 0, mixer5, 1);
+AudioConnection          patchCord12(waveform7, 0, mixer5, 2);
+AudioConnection          patchCord13(waveform8, 0, mixer5, 3);
+AudioConnection          patchCord14(multiply2, 0, mixer1, 2);
+AudioConnection          patchCord15(multiply3, 0, mixer1, 3);
+AudioConnection          patchCord16(waveform1, 0, mixer2, 0);
+AudioConnection          patchCord17(mixer1, 0, multiply1, 0);
+AudioConnection          patchCord18(waveform2, 0, mixer2, 1);
+AudioConnection          patchCord19(waveform3, 0, mixer2, 2);
+AudioConnection          patchCord20(waveform4, 0, mixer2, 3);
+AudioConnection          patchCord21(mixer5, 0, mixer4, 1);
+AudioConnection          patchCord22(multiply1, 0, audioOutput, 0);
+AudioConnection          patchCord23(multiply1, 0, audioOutput, 1);
+AudioConnection          patchCord24(mixer2, 0, mixer4, 0);
+AudioConnection          patchCord25(mixer4, 0, multiply1, 1);
+// GUItool: end automatically generated code
+
+// GUItool: end automatically generated code
+
+// GUItool: end automatically generated code
+
+
 
 // GUItool: end automatically generated code
 
@@ -234,12 +309,22 @@ AudioControlSGTL5000 audioShield;
 
 
 /* mixer choice setting */
-int MIXER_NUM = 3;
+int MIXER_NUM = 6;
 int MIXER_CURRENT = 2;
-int MIXER_L = 0;
-int MIXER_R = 1;
-int MIXER_LR= 2;
+int MIXER_L   = 0;
+int MIXER_R   = 1;
+int MIXER_LR  = 2;
+int MIXER_ALL = 3;
+int MIXER_INV = 4;
+int MIXER_MULT = 5;
 
+/* tone type */
+int D_TONE_TYPE_NUM = 4;
+int D_TONE_TYPE_CURRENT = 3;
+int D_TONE_TYPE_SINE = 0;
+int D_TONE_TYPE_SQUARE = 1;
+int D_TONE_TYPE_TRIANGLE = 2;
+int D_TONE_TYPE_SAWTOOTH = 3;
 
 
   
@@ -256,9 +341,86 @@ void setup() {
   waveform1.phase(0.0);
   waveform1.amplitude(1.0);
 
-  mixer1.gain(0,1.0);
-  mixer1.gain(1,1.0);
+  /* Waveform setup */
+  waveform2.begin(WAVEFORM_SAWTOOTH);
+  waveform2.frequency(notes[note_current]);
+  waveform2.phase(0.0);
+  waveform2.amplitude(1.0);
 
+    /* Waveform setup */
+  waveform3.begin(WAVEFORM_SQUARE);
+  waveform3.frequency(notes[note_current]);
+  waveform3.phase(0.0);
+  waveform3.amplitude(1.0);
+
+    /* Waveform setup */
+  waveform4.begin(WAVEFORM_SINE);
+  waveform4.frequency(notes[note_current]);
+  waveform4.phase(0.0);
+  waveform4.amplitude(1.0);
+
+
+
+  /* Waveform setup */
+  waveform5.begin(WAVEFORM_TRIANGLE);
+  waveform5.frequency(notes[note_current]);
+  waveform5.phase(0.0);
+  waveform5.amplitude(1.0);
+
+  /* Waveform setup */
+  waveform6.begin(WAVEFORM_SAWTOOTH);
+  waveform6.frequency(notes[note_current]);
+  waveform6.phase(0.0);
+  waveform6.amplitude(1.0);
+
+    /* Waveform setup */
+  waveform7.begin(WAVEFORM_SQUARE);
+  waveform7.frequency(notes[note_current]);
+  waveform7.phase(0.0);
+  waveform7.amplitude(1.0);
+
+    /* Waveform setup */
+  waveform8.begin(WAVEFORM_SINE);
+  waveform8.frequency(notes[note_current]);
+  waveform8.phase(0.0);
+  waveform8.amplitude(1.0);
+  
+
+
+
+
+
+  
+
+  mixer1.gain(0,MIXER_THROUGH_GAIN);
+  mixer1.gain(1,MIXER_THROUGH_GAIN);
+  mixer1.gain(2,0.0);
+  mixer1.gain(3,0.0);
+
+
+  /* choose over tone */
+  mixer2.gain(0,MIXER_THROUGH_GAIN_S);
+  mixer2.gain(1,0.0);
+  mixer2.gain(2,0.0);
+  mixer2.gain(3,0.0);
+
+  /* choose detuned overtone */
+  mixer5.gain(0,MIXER_THROUGH_GAIN_S);
+  mixer5.gain(1,0.0);
+  mixer5.gain(2,0.0);
+  mixer5.gain(3,0.0);
+
+  /* Pick to use detune */
+  mixer4.gain(0,MIXER_THROUGH_GAIN);
+  mixer4.gain(1,MIXER_THROUGH_GAIN);
+  mixer4.gain(2,0.0);
+  mixer4.gain(3,0.0);
+  setNote(note_current);
+  
+
+  /* invert */
+  mixer3.gain(0,-MIXER_THROUGH_GAIN);
+  
 
 
   /* Setup Cap Touch 0 */
@@ -280,7 +442,21 @@ void setup() {
 elapsedMillis fps;
 uint8_t cnt = 0;
 
+void switchToneTypeTouch(int des){
+  if(1 == des){
+    TONE_MODE_I = TONE_MODE_I + 1;
+    if(TONE_MODE_I > TONE_MODE_MAX)
+    {
+      switchToneType();
+      TONE_MODE_I = 0;
+    }
+  }
+  else{
+    TONE_MODE_I = TONE_MODE_I - 2;
+    if(TONE_MODE_I < 0) TONE_MODE_I = 0;
+  }
 
+}
 
 void doNote()
 {
@@ -293,8 +469,18 @@ void doNote()
 
 
   float vol = 0.5;
+  int toneModeFlag = 0;
   for (uint8_t i = 0; i < 12; i++) {
     // it if *is* touched and *wasnt* touched before, alert!
+    if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)) ){
+      // Switch tone type if top fret is hit
+      if(i == 0 )
+      {
+        switchToneTypeTouch(1);
+        toneModeFlag = 1;
+      }
+    }
+    
     if ((currtouched & _BV(i))){ // && !(lasttouched & _BV(i)) ) {
       if (the_note < (note_center + note_fret_0_i[i])) the_note = note_center + note_fret_0_i[i];
       digitalWrite(ledPin, HIGH);
@@ -307,7 +493,7 @@ void doNote()
 
     }
   }
-
+  if(toneModeFlag == 0) switchToneTypeTouch(0);
 
 
   currtouched = cap_2.touched();
@@ -329,13 +515,47 @@ void doNote()
   //if((0 == is_touched) & read_high & read_low) note_current = note_center;
   if (read_high & read_low) note_current = note_center;
   audioShield.volume(vol);
-  waveform1.frequency(notes[note_current]);
+  //waveform1.frequency(notes[note_current]);
+  setNote(note_current);
   // reset our state
   lasttouched = currtouched;
   return;
 }
 
+void toggleDetune()
+{
+  if(DETUNE_FLAG == 0)
+  {
+      /* Pick to use detune */
+    mixer4.gain(0,MIXER_THROUGH_GAIN_S);
+    mixer4.gain(1,0.0);
+    mixer4.gain(2,0.0);
+    mixer4.gain(3,0.0);
+    DETUNE_FLAG = 1;
+  }
+  else
+  {
+      /* Pick to use detune */
+    mixer4.gain(0,MIXER_THROUGH_GAIN);
+    mixer4.gain(1,MIXER_THROUGH_GAIN);
+    mixer4.gain(2,0.0);
+    mixer4.gain(3,0.0);
+    DETUNE_FLAG = 0;
+  }
+}
 
+void setNote(int note){
+  note_current = note;
+  waveform1.frequency(notes[note_current]);
+  waveform2.frequency(notes[note_current]);
+  waveform3.frequency(notes[note_current]);
+  waveform4.frequency(notes[note_current]);
+
+  waveform5.frequency(notes[note_current]+DETUNE_K);
+  waveform6.frequency(notes[note_current]+DETUNE_K);
+  waveform7.frequency(notes[note_current]+DETUNE_K);
+  waveform8.frequency(notes[note_current]+DETUNE_K);
+}
 
 
 
@@ -380,6 +600,57 @@ void doPrintPeak() {
 }
 
 
+void switchToneType(){
+    D_TONE_TYPE_CURRENT = D_TONE_TYPE_CURRENT+1;
+    if(D_TONE_TYPE_CURRENT > D_TONE_TYPE_NUM) D_TONE_TYPE_CURRENT = 0;
+    if(D_TONE_TYPE_CURRENT == D_TONE_TYPE_SAWTOOTH){
+      mixer2.gain(0,0.0);
+      mixer2.gain(1,MIXER_THROUGH_GAIN_S);
+      mixer2.gain(2,0.0);
+      mixer2.gain(3,0.0);
+      
+      mixer5.gain(0,0.0);
+      mixer5.gain(1,MIXER_THROUGH_GAIN_S);
+      mixer5.gain(2,0.0);
+      mixer5.gain(3,0.0);
+    }
+    if(D_TONE_TYPE_CURRENT == D_TONE_TYPE_TRIANGLE){
+      mixer2.gain(0,MIXER_THROUGH_GAIN_S);
+      mixer2.gain(1,0.0);
+      mixer2.gain(2,0.0);
+      mixer2.gain(3,0.0);
+      
+      mixer5.gain(0,MIXER_THROUGH_GAIN_S);
+      mixer5.gain(1,0.0);
+      mixer5.gain(2,0.0);
+      mixer5.gain(3,0.0);
+    }
+    if(D_TONE_TYPE_CURRENT == D_TONE_TYPE_TRIANGLE){
+      mixer2.gain(0,0.0);
+      mixer2.gain(1,0.0);
+      mixer2.gain(2,MIXER_THROUGH_GAIN_S);
+      mixer2.gain(3,0.0);
+      
+      mixer5.gain(0,0.0);
+      mixer5.gain(1,0.0);
+      mixer5.gain(2,MIXER_THROUGH_GAIN_S);
+      mixer5.gain(3,0.0);
+    }
+
+    if(D_TONE_TYPE_CURRENT == D_TONE_TYPE_SINE){
+      mixer2.gain(0,0.0);
+      mixer2.gain(1,0.0);
+      mixer2.gain(2,0.0);
+      mixer2.gain(3,MIXER_THROUGH_GAIN_S);
+      
+      mixer5.gain(0,0.0);
+      mixer5.gain(1,0.0);
+      mixer5.gain(2,0.0);
+      mixer5.gain(3,MIXER_THROUGH_GAIN_S);
+    }
+
+}
+
 void keyAction(char key)
 {
   if ('1' == key) {
@@ -388,7 +659,8 @@ void keyAction(char key)
     {
       note_center = note_center - 1;
       note_current = note_current - 1;
-      waveform1.frequency(notes[note_current]);
+      //waveform1.frequency(notes[note_current]);
+      setNote(note_current);
     }
   }
   if ('2' == key) {
@@ -403,31 +675,94 @@ void keyAction(char key)
     {
       note_center = note_center + 1;
       note_current = note_current + 1;
-      waveform1.frequency(notes[note_current]);
+      //waveform1.frequency(notes[note_current]);
+      setNote(note_current);
+    }
+  }
+
+  if ('*' == key) {
+    DETUNE_K = DETUNE_K - DETUNE_STEP;
+    if(DETUNE_K < 0.0) DETUNE_K = 0.0;
+    setNote(note_current);
+  }
+
+  
+  if ('#' == key) {
+    DETUNE_K = DETUNE_K + DETUNE_STEP;
+    if(DETUNE_K < 0.0) DETUNE_K = 0.0;
+    setNote(note_current);
+  }
+
+
+  if('E' == key) {
+      MIXER_CURRENT = MIXER_LR;
+      mixer1.gain(0,MIXER_THROUGH_GAIN);
+      mixer1.gain(1,MIXER_THROUGH_GAIN);
+      mixer1.gain(2,0.0);
+      mixer1.gain(3,0.0);
+    }
+
+  if ('7' == key) {
+    // Toggle mixer
+    if(MIXER_CURRENT == MIXER_LR){
+      MIXER_CURRENT = MIXER_L;
+      mixer1.gain(0,0.0);
+      mixer1.gain(1,MIXER_THROUGH_GAIN_S);
+      mixer1.gain(2,0.0);
+      mixer1.gain(3,0.0);
+    }
+    else{
+      MIXER_CURRENT = MIXER_LR;
+      mixer1.gain(0,MIXER_THROUGH_GAIN);
+      mixer1.gain(1,MIXER_THROUGH_GAIN);
+      mixer1.gain(2,0.0);
+      mixer1.gain(3,0.0);
     }
   }
 
 
-  if('*' == key) {
+  if('C' == key) {
+      MIXER_CURRENT = MIXER_L;
+      mixer1.gain(0,0.0);
+      mixer1.gain(1,MIXER_THROUGH_GAIN_S);
+      mixer1.gain(2,0.0);
+      mixer1.gain(3,0.0);
+    }
+
+    if('A' == key) {
+      switchToneType();
+    }
+
+   if('0' == key) {
+      toggleDetune();
+    }
+
+  if('D' == key) {
     MIXER_CURRENT = MIXER_CURRENT+1;
     if(MIXER_CURRENT > MIXER_NUM) MIXER_CURRENT = 0;
     if(MIXER_CURRENT == MIXER_L){
-      mixer1.gain(0,1.0);
+      mixer1.gain(0,MIXER_THROUGH_GAIN_S);
       mixer1.gain(1,0.0);
       mixer1.gain(2,0.0);
       mixer1.gain(3,0.0);
     }
     if(MIXER_CURRENT == MIXER_R){
       mixer1.gain(0,0.0);
-      mixer1.gain(1,1.0);
+      mixer1.gain(1,MIXER_THROUGH_GAIN_S);
       mixer1.gain(2,0.0);
       mixer1.gain(3,0.0);
     }
     if(MIXER_CURRENT == MIXER_LR){
-      mixer1.gain(0,1.0);
-      mixer1.gain(1,1.0);
+      mixer1.gain(0,MIXER_THROUGH_GAIN);
+      mixer1.gain(1,MIXER_THROUGH_GAIN);
       mixer1.gain(2,0.0);
       mixer1.gain(3,0.0);
+    }
+    if(MIXER_CURRENT == MIXER_ALL){
+      mixer1.gain(0,MIXER_THROUGH_GAIN);
+      mixer1.gain(1,MIXER_THROUGH_GAIN);
+      mixer1.gain(2,MIXER_THROUGH_GAIN);
+      mixer1.gain(3,MIXER_THROUGH_GAIN);
     }
     
   }
