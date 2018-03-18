@@ -1,0 +1,11 @@
+2018-03-17: Finished V1 - running on Teensy 3.2
+Buttons:
+1 = transpose down (half step)
+2 = return to center for transpose
+3 = transpose up (half step)
+
+7 = switch input type (toggles between left only and left + right)
+
+* = detune down 
+0 = toggle detune on/off
+# = detune up
