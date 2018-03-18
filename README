@@ -9,3 +9,10 @@ Buttons:
 * = detune down 
 0 = toggle detune on/off
 # = detune up
+
+Top Fret Hold: Changes tone type, order
+- Sawtooth (Default)
+- Sine/triangle
+- Sine
+- Square
+- Triangle

@@ -319,12 +319,13 @@ int MIXER_INV = 4;
 int MIXER_MULT = 5;
 
 /* tone type */
-int D_TONE_TYPE_NUM = 4;
+int D_TONE_TYPE_NUM = 5;
 int D_TONE_TYPE_CURRENT = 3;
 int D_TONE_TYPE_SINE = 0;
 int D_TONE_TYPE_SQUARE = 1;
 int D_TONE_TYPE_TRIANGLE = 2;
 int D_TONE_TYPE_SAWTOOTH = 3;
+int D_TONE_TYPE_SINE_TRIANGLE = 4;
 
 
   
@@ -625,7 +626,7 @@ void switchToneType(){
       mixer5.gain(2,0.0);
       mixer5.gain(3,0.0);
     }
-    if(D_TONE_TYPE_CURRENT == D_TONE_TYPE_TRIANGLE){
+    if(D_TONE_TYPE_CURRENT == D_TONE_TYPE_SQUARE){
       mixer2.gain(0,0.0);
       mixer2.gain(1,0.0);
       mixer2.gain(2,MIXER_THROUGH_GAIN_S);
@@ -642,6 +643,18 @@ void switchToneType(){
       mixer2.gain(1,0.0);
       mixer2.gain(2,0.0);
       mixer2.gain(3,MIXER_THROUGH_GAIN_S);
+      
+      mixer5.gain(0,0.0);
+      mixer5.gain(1,0.0);
+      mixer5.gain(2,0.0);
+      mixer5.gain(3,MIXER_THROUGH_GAIN_S);
+    }
+
+    if(D_TONE_TYPE_CURRENT == D_TONE_TYPE_SINE_TRIANGLE){
+      mixer2.gain(0,MIXER_THROUGH_GAIN_S);
+      mixer2.gain(1,0.0);
+      mixer2.gain(2,0.0);
+      mixer2.gain(3,0.0);
       
       mixer5.gain(0,0.0);
       mixer5.gain(1,0.0);
